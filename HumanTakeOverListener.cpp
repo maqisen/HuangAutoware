@@ -28,3 +28,24 @@
 
 //    alerts_gen_path():
 //       TODO!
+
+
+// START OF CODE
+// #include <rviz_common/display_context.hpp>
+//#include "autoware/control_evaluator/control_evaluator_node.hpp"
+
+//#include "autoware/control_evaluator/metrics/metrics_utils.hpp"
+// void subscribe_to_ros_topic() {
+//   raw_node_ = this->getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
+//
+//   sub_operation_mode_ = raw_node_->create_subscription<OperationModeState>(
+//    "/api/operation_mode/state", rclcpp::QoS{1}.transient_local(),
+//    std::bind(&on_takeover, this, std::placeholders::_1));
+//}
+    
+// void on_takeover(const OperationModeState::ConstSharedPtr msg) {
+//   if (msg->is_autoware_control_enabled) {
+//     const auto odom = odometry_sub_.take_data(); // from control_evaluator_node
+//     handle_takeover_event(odom->pose.pose);
+//   }
+// }
