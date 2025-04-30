@@ -31,21 +31,36 @@
 
 
 // START OF CODE
-// #include <rviz_common/display_context.hpp>
-//#include "autoware/control_evaluator/control_evaluator_node.hpp"
+#include <rviz_common/display_context.hpp>
+#include "autoware/control_evaluator/control_evaluator_node.hpp"
+#include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 
-//#include "autoware/control_evaluator/metrics/metrics_utils.hpp"
-// void subscribe_to_ros_topic() {
-//   raw_node_ = this->getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
-//
-//   sub_operation_mode_ = raw_node_->create_subscription<OperationModeState>(
-//    "/api/operation_mode/state", rclcpp::QoS{1}.transient_local(),
-//    std::bind(&on_takeover, this, std::placeholders::_1));
-//}
+#include "autoware/control_evaluator/metrics/metrics_utils.hpp"
+void subscribe_to_ros_topic() {
+  raw_node_ = this->getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
+
+  sub_operation_mode_ = raw_node_->create_subscription<OperationModeState>(
+    "/api/operation_mode/state", rclcpp::QoS{1}.transient_local(),
+    std::bind(&on_takeover, this, std::placeholders::_1));
+}
     
-// void on_takeover(const OperationModeState::ConstSharedPtr msg) {
-//   if (msg->is_autoware_control_enabled) {
-//     const auto odom = odometry_sub_.take_data(); // from control_evaluator_node
-//     handle_takeover_event(odom->pose.pose);
-//   }
-// }
+void on_takeover(const OperationModeState::ConstSharedPtr msg) {
+ if (msg->is_autoware_control_enabled) {
+    const auto odom = odometry_sub_.take_data(); // from control_evaluator_node
+    handle_takeover_event(odom->pose.pose);
+  }
+}
+
+void handle_takeover_event(const geometry_msgs::msg::Pose event_pose) {
+  occurrences = check_takeover_occurrence(event_pose);
+  if (occurences == 0) {
+    TakeOverRecord.insertRecord(event_pose);
+  } else {
+    TakeOverRecord.updateCount(event_pose);
+    // TODO: generate path
+  }
+}
+
+int check_takeover_occurence(const geometry_msgs::msg::Pose event_pose) {
+  //TODO: implement method
+}
