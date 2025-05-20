@@ -45,7 +45,7 @@ void subscribe_to_ros_topic() {
 }
     
 void on_takeover(const OperationModeState::ConstSharedPtr msg) {
- if (msg->is_autoware_control_enabled) {
+ if (!msg->is_autoware_control_enabled) {
     const auto odom = odometry_sub_.take_data(); // from control_evaluator_node
     handle_takeover_event(odom->pose.pose);
   }
@@ -57,10 +57,29 @@ void handle_takeover_event(const geometry_msgs::msg::Pose event_pose) {
     TakeOverRecord.insertRecord(event_pose);
   } else {
     TakeOverRecord.updateCount(event_pose);
-    // TODO: generate path
+    wait_until_takeover_ends();
   }
 }
 
 int check_takeover_occurence(const geometry_msgs::msg::Pose event_pose) {
   //TODO: implement method
+}
+
+void wait_until_takeover_ends(const geometry_msgs::msg::Pose& event_pose) {
+  raw_node_ = this->getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
+
+  sub_operation_mode_ = raw_node_->create_subscription<OperationModeState>(
+    "/api/operation_mode/state", rclcpp::QoS{1}.transient_local(),
+    [this, event_pose](const OperationModeState::ConstSharedPtr msg) {
+      this->record_endpoint(msg, event_pose);
+    });
+}
+
+void record_endpoint(const OperationModeState::ConstSharedPtr msg, const geometry_msgs::msg::Pose& event_pose) {
+  if (msg->is_autoware_control_enabled) {
+    // TODO: bind the endpoint to the startpoint in our database
+  }
+
+  // removes the listener
+  sub_operation_mode_.reset();
 }
